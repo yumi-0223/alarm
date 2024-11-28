@@ -3,6 +3,7 @@ import 'group/alarm_group1.dart';
 import 'group/alarm_group2.dart';
 import 'group/alarm_group3.dart';
 import 'setting/setting_page.dart';
+import 'alarm_Screen.dart';
 import 'dart:async';
 
 class MyPage extends StatefulWidget {
@@ -48,12 +49,74 @@ class _MyPageState extends State<MyPage> {
               itemCount: todoList.length,
               itemBuilder: (context, index) {
                 return Card(
-                  child: ListTile(
-                    title: Text(todoList[index]),
-                    subtitle: Text(todoList[index]),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0), // カード内に余白を追加
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center, // 中央揃え
+                      children: [
+                        Text(
+                          todoList[index],
+                          style: TextStyle(fontSize: 18), // タイトルのテキスト
+                        ),
+                        const SizedBox(width: 20), // テキストとボタンの間隔
+                        ElevatedButton(
+                          onPressed: () async {
+                            // 「セット」ボタンが押された時、AlarmScreenに遷移
+                            final selectedTime = await Navigator.of(context).push(
+                              MaterialPageRoute(builder: (context) => AlarmScreen()),
+                            );
+                            if (selectedTime != null) {
+                              setState(() {
+                                todoList[index] = 'アラーム時刻: ${selectedTime.format(context)}'; // 時刻を表示
+                              });
+                            }
+                          },
+                          child: const Text('セット'),
+                        ),
+                                    
+                      ],
+                    ),
                   ),
                 );
               },
+            ),
+          )
+          ,
+
+          Align(
+            alignment: Alignment(0, 0.2), // 中央揃え（x方向: 0, y方向: -0.5）
+            child: Row(
+              mainAxisSize: MainAxisSize.min, // 必要最小限の高さに
+              mainAxisAlignment: MainAxisAlignment.center, // 横方向の中央揃え
+          children: [
+            Container(
+              width: 100, // 幅を固定
+              height: 50, // 高さを固定
+              alignment: Alignment.center, // 中央揃え
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color.fromARGB(255, 67, 67, 67), width: 1), // 枠線
+                color: const Color.fromARGB(255, 212, 212, 212),
+              ),
+              child: Text(
+                "起きてる",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            //const SizedBox(width: 20), // テキスト間の間隔
+            Container(
+              width: 100, // 幅を固定
+              height: 50, // 高さを固定
+              alignment: Alignment.center, // 中央揃え
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color.fromARGB(255, 67, 67, 67), width: 1), // 枠線
+                color: const Color.fromARGB(255, 212, 212, 212),
+              ),
+              child: Text(
+                "起きてない",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+              ],
             ),
           ),
           //グループ選択ボタン
