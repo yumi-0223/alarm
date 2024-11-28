@@ -6,6 +6,16 @@ plugins {
 }
 
 android {
+
+
+    compileSdkVersion 33 // 最新のバージョンに更新（例: 33）
+    defaultConfig {
+        minSdkVersion 21 // 依存関係で必要とされる最小値に調整
+        targetSdkVersion 33
+    }
+
+
+
     namespace = "com.example.alarm"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -37,6 +47,7 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+
 }
 
 flutter {

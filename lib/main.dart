@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/my_page.dart';
+import 'digitalcontents-alarm/pages/my_page.dart';
 
 void main() {
   runApp(MyApp());
