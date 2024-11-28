@@ -4,7 +4,10 @@ import 'group/alarm_group2.dart';
 import 'group/alarm_group3.dart';
 import 'setting/setting_page.dart';
 import 'alarm_Screen.dart';
+import 'open_camera.dart';
 import 'dart:async';
+//import 'package:image_picker/image_picker.dart';  // image_pickerをインポート
+
 
 class MyPage extends StatefulWidget {
   @override
@@ -83,41 +86,62 @@ class _MyPageState extends State<MyPage> {
           )
           ,
 
-          Align(
-            alignment: Alignment(0, 0.2), // 中央揃え（x方向: 0, y方向: -0.5）
-            child: Row(
-              mainAxisSize: MainAxisSize.min, // 必要最小限の高さに
-              mainAxisAlignment: MainAxisAlignment.center, // 横方向の中央揃え
-          children: [
-            Container(
-              width: 100, // 幅を固定
-              height: 50, // 高さを固定
-              alignment: Alignment.center, // 中央揃え
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center, // 縦方向に中央揃え
+            children: <Widget>[
+              // 起きてる・起きてないの表示
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 横並びの中央揃え
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1),
+                      color: const Color.fromARGB(255, 211, 211, 211),
+                    ),
+                    child: Text(
+                      "起きてる",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1),
+                      color: const Color.fromARGB(255, 211, 211, 211),
+                    ),
+                    child: Text(
+                      "起きてない",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ],
+              ),
+              // カメラボタン
+            ElevatedButton.icon(
+            onPressed: () {
+              // カメラ起動の処理をコメントアウト
+              print("カメラ起動ボタンが押されました");
+            },
+            icon: Container(
+              padding: EdgeInsets.all(5), // アイコンの周りに余白を追加
               decoration: BoxDecoration(
-                border: Border.all(color: const Color.fromARGB(255, 67, 67, 67), width: 1), // 枠線
-                color: const Color.fromARGB(255, 212, 212, 212),
+                shape: BoxShape.circle, // 丸い枠
+                border: Border.all(color: Colors.white, width: 1), // 白い枠線
               ),
-              child: Text(
-                "起きてる",
-                style: TextStyle(fontSize: 16),
-              ),
+              child: Icon(Icons.camera_alt, color: Colors.white), // アイコンを白色に
             ),
-            //const SizedBox(width: 20), // テキスト間の間隔
-            Container(
-              width: 100, // 幅を固定
-              height: 50, // 高さを固定
-              alignment: Alignment.center, // 中央揃え
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color.fromARGB(255, 67, 67, 67), width: 1), // 枠線
-                color: const Color.fromARGB(255, 212, 212, 212),
+            label: Text('カメラを起動'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 0, 0, 0), // 背景色
+              foregroundColor: Colors.white, // 文字色
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero, // 四角形
               ),
-              child: Text(
-                "起きてない",
-                style: TextStyle(fontSize: 16),
-              ),
+              minimumSize: Size(234, 50), // 横幅200、高さ50
             ),
-              ],
             ),
+            ],
           ),
           //グループ選択ボタン
           Positioned(
