@@ -156,7 +156,7 @@ class _AlarmGroup3State extends State<AlarmGroup3> {
                 top: MediaQuery.of(context).size.height * 4 / 10,
                 child: Stack(
                   alignment: Alignment.center, // 中央にアイコンを配置
-                  children: 
+                  children: [
                     FloatingActionButton(onPressed: () {
                       Navigator.push(
                         context,
