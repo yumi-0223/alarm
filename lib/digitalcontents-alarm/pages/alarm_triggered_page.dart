@@ -8,6 +8,15 @@ class AlarmTriggeredPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('アラーム！'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // ここで任意の処理を追加できます
+            // 戻るときにfalseを返す
+            Navigator.pop(context, false); // isAlarmTriggeredをリセット
+            //Navigator.pop(context); // 戻る処理
+          },
+        ),
       ),
       body: Center(
         child: Text(
