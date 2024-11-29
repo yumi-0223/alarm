@@ -111,8 +111,8 @@ class _AlarmGroup1State extends State<AlarmGroup1> {
           Stack(
             children: [
               Positioned(
-                left: screenWidth * 8 / 10,
-                top: screenWidth * 0.75 / 10,
+                left: MediaQuery.of(context).size.width * 8 / 10,
+                top: MediaQuery.of(context).size.height * 1 / 10,
                 child: Stack(
                   alignment: Alignment.center, // 中央にアイコンを配置
                   children: [
@@ -134,8 +134,8 @@ class _AlarmGroup1State extends State<AlarmGroup1> {
                 ),
               ),
               Positioned(
-                left: screenWidth * 8 / 10,
-                top: screenWidth * 2.5 / 10,
+                left: MediaQuery.of(context).size.width * 8 / 10,
+                top: MediaQuery.of(context).size.height * 2.5 / 10,
                 child: Stack(
                   alignment: Alignment.center, // 中央にアイコンを配置
                   children: [
@@ -155,8 +155,8 @@ class _AlarmGroup1State extends State<AlarmGroup1> {
                 ),
               ),
               Positioned(
-                left: screenWidth * 8 / 10,
-                top: screenWidth * 4.25 / 10,
+                left: MediaQuery.of(context).size.width * 8 / 10,
+                top: MediaQuery.of(context).size.height * 4 / 10,
                 child: Stack(
                   alignment: Alignment.center, // 中央にアイコンを配置
                   children: [
@@ -176,8 +176,8 @@ class _AlarmGroup1State extends State<AlarmGroup1> {
                 ),
               ),
               Positioned(
-                left: screenWidth * 8 / 10,
-                top: screenWidth * 6 / 10,
+                left: MediaQuery.of(context).size.width * 8 / 10,
+                top: MediaQuery.of(context).size.height * 5.5 / 10,
                 child: Stack(
                   alignment: Alignment.center, // 中央にアイコンを配置
                   children: [
