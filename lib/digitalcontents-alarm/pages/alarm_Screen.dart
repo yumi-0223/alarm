@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class AlarmScreen extends StatefulWidget {
   @override
   _AlarmScreenState createState() => _AlarmScreenState();
@@ -8,7 +9,6 @@ class AlarmScreen extends StatefulWidget {
 class _AlarmScreenState extends State<AlarmScreen> {
   TimeOfDay selectedTime = TimeOfDay.now(); // 現在の時間をデフォルトに設定
 
-  // 時刻選択ダイアログを表示する関数
   void _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -43,9 +43,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // アラーム設定ボタンの処理
-                Navigator.pop(context, selectedTime); // 選択した時刻を戻す
-                print('アラームが ${selectedTime.format(context)} に設定されました。');
+                Navigator.pop(context, selectedTime); // アラーム設定を戻す
               },
               child: Text('アラームを設定'),
             ),
@@ -55,3 +53,4 @@ class _AlarmScreenState extends State<AlarmScreen> {
     );
   }
 }
+

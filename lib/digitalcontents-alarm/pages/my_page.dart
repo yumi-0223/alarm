@@ -5,6 +5,7 @@ import 'group/alarm_group3.dart';
 import 'setting/setting_page.dart';
 import 'alarm_Screen.dart';
 import 'open_camera.dart';
+import 'alarm_triggered_page.dart';
 import 'dart:async';
 //import 'package:image_picker/image_picker.dart';  // image_pickerをインポート
 
@@ -14,10 +15,13 @@ class MyPage extends StatefulWidget {
   _MyPageState createState() => _MyPageState();
 }
 
+
+
 class _MyPageState extends State<MyPage> {
   // グループページ
   List<String> todoList = ["目覚まし1", "目覚まし2", "目覚まし3"];
   DateTime currentTime = DateTime.now();
+  TimeOfDay? alarmTime; // アラーム時刻を保持
 
   //現在時刻の変数
   @override
@@ -29,8 +33,25 @@ class _MyPageState extends State<MyPage> {
       setState(() {
         currentTime = DateTime.now(); // 時刻更新
       });
+      _checkAlarmTime(); 
     });
   }
+
+  // アラーム時刻と現在時刻を比較して一致した場合に画面遷移
+  void _checkAlarmTime() {
+    if (alarmTime != null) {
+      final now = TimeOfDay.now();
+      if (now.hour == alarmTime!.hour && now.minute == alarmTime!.minute) {
+        // アラーム時刻と一致した場合に画面遷移
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AlarmTriggeredPage()),
+        );
+      }
+    }
+  }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +62,7 @@ class _MyPageState extends State<MyPage> {
     return Scaffold(
       // AppBarを表示し、タイトルも設定
       appBar: AppBar(
-        title: const Text('マイページ'),
+        title: Text('マイページ | ${currentTime.hour}:${currentTime.minute}:${currentTime.second}'),
       ),
       // データを元にListViewを作成
       body: Stack(
@@ -71,6 +92,7 @@ class _MyPageState extends State<MyPage> {
                             if (selectedTime != null) {
                               setState(() {
                                 todoList[index] = 'アラーム時刻: ${selectedTime.format(context)}'; // 時刻を表示
+                                alarmTime = selectedTime; // アラーム時刻を保存
                               });
                             }
                           },
@@ -256,3 +278,5 @@ class _MyPageState extends State<MyPage> {
     );
   }
 }
+
+
