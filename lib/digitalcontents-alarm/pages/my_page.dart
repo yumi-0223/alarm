@@ -8,13 +8,14 @@ import 'open_camera.dart';
 import 'alarm_triggered_page.dart';
 import 'todo.dart';
 import 'dart:async';
-//import 'package:image_picker/image_picker.dart';  // image_pickerをインポート
+import 'package:image_picker/image_picker.dart';  // image_pickerをインポート
 
 
 class MyPage extends StatefulWidget {
   @override
   _MyPageState createState() => _MyPageState();
 }
+
 
 class _MyPageState extends State<MyPage> {
   // Todoリスト（各Todoのタイトル、アラーム時刻、アラーム状態を保持）
@@ -26,6 +27,18 @@ class _MyPageState extends State<MyPage> {
 
   DateTime currentTime = DateTime.now();
   bool _isAlarmTriggered = false;
+  final ImagePicker _picker = ImagePicker();  // ImagePickerのインスタンスを作成
+
+  // カメラを起動する関数
+  Future<void> _openCamera() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      print('カメラで撮影された画像: ${image.path}');
+      // 撮影された画像の処理をここで行う
+    } else {
+      print('カメラがキャンセルされました');
+    }
+  }
 
   @override
   void initState() {
@@ -167,21 +180,12 @@ class _MyPageState extends State<MyPage> {
                   ),
                 ],
               ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  print("カメラ起動ボタンが押されました");
-                },
-                icon: Icon(Icons.camera_alt, color: Colors.white),
-                label: Text('カメラを起動'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                  minimumSize: Size(225, 50),
-                ),
-              ),
+              // カメラアイコンボタン
+            ElevatedButton.icon(
+              onPressed: _openCamera,  // ボタンが押されたときにカメラを起動
+              icon: Icon(Icons.camera_alt),  // カメラアイコン
+              label: Text('カメラを起動'),  // ボタンのラベル
+            ),
             ],
           ),
         ),
