@@ -1,3 +1,5 @@
+import 'package:alarm/digitalcontents-alarm/pages/setting/group_create.dart';
+import 'package:alarm/digitalcontents-alarm/pages/setting/group_join.dart';
 import 'package:flutter/material.dart';
 import '../group/alarm_group1.dart';
 import 'name_change.dart';
@@ -43,7 +45,7 @@ class _SettingPageState extends State<SettingPage> {
                   // ボタン2が押された時にPage2に遷移
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SettingPage()),
+                    MaterialPageRoute(builder: (context) => GroupCreatePage()),
                   );
                 },
                 child: Text("グループ作成"),
@@ -59,7 +61,7 @@ class _SettingPageState extends State<SettingPage> {
                   // ボタン3が押された時にPage3に遷移
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SettingPage()),
+                    MaterialPageRoute(builder: (context) => GroupJoinPage()),
                   );
                 },
                 child: Text("グループ入る"),
