@@ -3,6 +3,7 @@ import 'package:alarm/digitalcontents-alarm/pages/group/alarm_group3.dart';
 import 'package:flutter/material.dart';
 import '../setting/setting_page.dart';
 import 'package:alarm/digitalcontents-alarm/pages/group/wakeup2.dart';
+import '../mypage/my_page.dart';
 
 class AlarmGroup2 extends StatefulWidget {
   @override
@@ -191,6 +192,24 @@ class _AlarmGroup2State extends State<AlarmGroup2> {
                       size: 24, // アイコンのサイズ
                     ),
                   ],
+                ),
+              ),
+              Positioned(
+                left: screenWidth * 9 / 10,
+                top: screenHeight * 0 / 10,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MyPage(),
+                      ),
+                    );
+                  },
+                  child: Icon(
+                    Icons.home,
+                    size: 24,
+                  ),
                 ),
               ),
             ],
