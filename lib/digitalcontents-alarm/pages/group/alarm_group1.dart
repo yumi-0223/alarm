@@ -112,6 +112,54 @@ class _AlarmGroup1State extends State<AlarmGroup1> {
           Stack(
             children: [
               Positioned(
+                top: MediaQuery.of(context).size.height * 1 / 10, // 縦の位置を指定
+                left: 0, // スタックの左端を指定
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // 中央揃え
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起きてる",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起こされてる",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起きてない", //
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          Stack(
+            children: [
+              Positioned(
                 left: MediaQuery.of(context).size.width * 8 / 10,
                 top: MediaQuery.of(context).size.height * 1 / 10,
                 child: Stack(
