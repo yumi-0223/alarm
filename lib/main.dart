@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'digitalcontents-alarm/pages/mypage/my_page.dart';
 import 'digitalcontents-alarm/pages/start/start.dart';
 
+//aaaaaa
 void main() {
   runApp(MyApp());
 }
