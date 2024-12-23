@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   # 他の依存関係のバージョンを最新に
+  
+
 
 
 
@@ -39,6 +41,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   image_picker: ^1.1.2
   permission_handler: ^11.3.1
+  firebase_auth: ^5.3.4
+  provider: ^6.1.2
   #flutter_local_notifications: ^18.0.1
   #stimezone: ^0.10.0
 
@@ -96,5 +100,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
 
 

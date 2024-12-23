@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "977661455250",
+    "project_id": "sleep-f3c99",
+    "storage_bucket": "sleep-f3c99.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:977661455250:android:36b64dad48d75468336f4b",
+        "android_client_info": {
+          "package_name": "com.example.alarm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtAEDZ19RjUDl2s-C8cAa94NRV812Nwg8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
