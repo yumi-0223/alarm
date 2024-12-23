@@ -1,5 +1,7 @@
+import 'package:alarm/digitalcontents-alarm/pages/start/start.dart';
 import 'package:flutter/material.dart';
 import 'digitalcontents-alarm/pages/mypage/my_page.dart';
+import 'digitalcontents-alarm/pages/start/start.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyPage(), // 初期画面
+      home: Start(), // 初期画面
     );
   }
 }
