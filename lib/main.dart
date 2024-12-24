@@ -5,6 +5,8 @@ import 'digitalcontents-alarm/pages/start/start.dart';
 import 'digitalcontents-alarm/pages/mypage/my_page.dart';
 import 'package:firebase_core/firebase_core.dart'; // Firebase Coreのインポート
 
+//!!!!!!!!!!!!!!!!!!個人情報!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//GPTに投げないで！！！！！！！！！！！！！！！！！！！
 // Firebase設定を追加（Firebaseコンソールで取得した設定を使用）
 const firebaseOptions = FirebaseOptions(
     apiKey: "AIzaSyACRVjGQRd5ZCnuEW3Igo-MgDMJNKWqrFg",

@@ -8,7 +8,6 @@ import 'open_camera.dart';
 import 'alarm_triggered_page.dart';
 import 'todo.dart';
 import 'dart:async';
-// import 'package:image_picker/image_picker.dart'; // image_pickerをインポート
 
 class MyPage extends StatefulWidget {
   @override
@@ -24,19 +23,6 @@ class _MyPageState extends State<MyPage> {
   ];
 
   DateTime currentTime = DateTime.now();
-  bool _isAlarmTriggered = false;
-  // final ImagePicker _picker = ImagePicker(); // ImagePickerのインスタンスを作成
-
-  // // カメラを起動する関数
-  // Future<void> _openCamera() async {
-  //   final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-  //   if (image != null) {
-  //     print('カメラで撮影された画像: ${image.path}');
-  //     // 撮影された画像の処理をここで行う
-  //   } else {
-  //     print('カメラがキャンセルされました');
-  //   }
-  // }
 
   @override
   void initState() {
@@ -63,7 +49,6 @@ class _MyPageState extends State<MyPage> {
             MaterialPageRoute(builder: (context) => AlarmTriggeredPage()),
           );
           todo.isAlarmOn = false; // 一度アラームを止める
-          _isAlarmTriggered = true;
           break;
         }
       }
@@ -131,14 +116,19 @@ class _MyPageState extends State<MyPage> {
                             // セットボタン
                             ElevatedButton(
                               onPressed: () async {
-                                final selectedTime =
+                                final updatedTime =
                                     await Navigator.of(context).push(
                                   MaterialPageRoute(
-                                      builder: (context) => AlarmScreen()),
+                                    builder: (context) => AlarmSettingPage(
+                                      alarmLabel: todo.title,
+                                      initialTime: todo.alarmTime,
+                                    ),
+                                  ),
                                 );
-                                if (selectedTime != null) {
+
+                                if (updatedTime != null) {
                                   setState(() {
-                                    todo.alarmTime = selectedTime;
+                                    todo.alarmTime = updatedTime;
                                     todo.isAlarmOn = true;
                                   });
                                 }
@@ -186,12 +176,6 @@ class _MyPageState extends State<MyPage> {
                         ),
                       ],
                     ),
-                    // カメラアイコンボタン
-                    // ElevatedButton.icon(
-                    //    onPressed: _openCamera, // ボタンが押されたときにカメラを起動
-                    //   icon: Icon(Icons.camera_alt), // カメラアイコン
-                    //   label: Text('カメラを起動'), // ボタンのラベル
-                    // ),
                   ],
                 ),
               ),
