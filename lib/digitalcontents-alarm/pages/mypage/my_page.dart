@@ -9,6 +9,9 @@ import 'alarm_triggered_page.dart';
 import 'todo.dart';
 import 'dart:async';
 import 'package:image_picker/image_picker.dart'; // image_pickerをインポート
+import 'package:audioplayers/audioplayers.dart'; // 音楽再生用
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'; // 通知用
+
 
 class MyPage extends StatefulWidget {
   @override
@@ -38,9 +41,14 @@ class _MyPageState extends State<MyPage> {
     }
   }
 
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+  final AudioPlayer audioPlayer = AudioPlayer(); // 音楽再生用
+
   @override
   void initState() {
     super.initState();
+    _initializeNotifications();
     // 1秒ごとに時刻を更新
     Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
@@ -50,6 +58,28 @@ class _MyPageState extends State<MyPage> {
     });
   }
 
+  void _initializeNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('app_icon'); // 通知アイコンを設定
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: _onNotificationResponse,
+    );
+  }
+
+  void _onNotificationResponse(NotificationResponse notificationResponse) {
+    _showAlarmScreen(); // アラーム画面を表示
+  }
+
+  void _showAlarmScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AlarmTriggeredPage(audioPlayer: audioPlayer)),
+    );
+  }
+
   // 各Todoのアラーム時刻を確認
   void _checkAlarmTime() {
     for (var todo in todoList) {
@@ -57,18 +87,51 @@ class _MyPageState extends State<MyPage> {
         final now = TimeOfDay.now();
         if (now.hour == todo.alarmTime!.hour &&
             now.minute == todo.alarmTime!.minute) {
-          // アラーム時刻と一致した場合に画面遷移
+          // アラーム音を再生
+          _playAlarmSound();
+
+          // アラーム画面に遷移
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AlarmTriggeredPage()),
+            MaterialPageRoute(
+              builder: (context) => AlarmTriggeredPage(audioPlayer: audioPlayer),
+            ),
           );
-          todo.isAlarmOn = false; // 一度アラームを止める
+
+          todo.isAlarmOn = false; // アラームを一時停止
           _isAlarmTriggered = true;
           break;
         }
       }
     }
   }
+
+  // 通知を表示
+  void _showNotification() async {
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'alarm_channel',
+      'Alarm Notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const NotificationDetails platformDetails =
+        NotificationDetails(android: androidDetails);
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'アラーム',
+      'アラームが鳴っています！',
+      platformDetails,
+    );
+  }
+
+  // アラーム音を再生
+  void _playAlarmSound() async {
+    await audioPlayer.play(
+      AssetSource('alarm.mp3'), // `assets/alarm.mp3` にアラーム音を配置
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
