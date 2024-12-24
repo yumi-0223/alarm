@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: AuthPage(), // homeにLoginPageを指定
+      home: MyPage(), // homeにLoginPageを指定
     );
   }
 }
