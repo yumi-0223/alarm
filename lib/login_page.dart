@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'registration_page.dart'; // RegistrationPageのインポート
 
 class LoginPage extends StatefulWidget {
   @override
@@ -17,13 +18,19 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text.trim(),
       );
       print('Login successful');
-      // ログイン成功時の処理（画面遷移など）
     } catch (e) {
-      print('Login failed: $e');
-      // エラーメッセージを表示
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: ${e.toString()}')),
-      );
+      if (e is FirebaseAuthException) {
+        print('Login failed: ${e.code} - ${e.message}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: ${e.code} - ${e.message}')),
+        );
+      } else {
+        // その他のエラーが発生した場合
+        print('Unexpected error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unexpected error: $e')),
+        );
+      }
     }
   }
 
@@ -49,6 +56,24 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               onPressed: _login,
               child: Text('Login'),
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Don't have an account?"),
+                TextButton(
+                  onPressed: () {
+                    // RegistrationPageに遷移
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => RegistrationPage()),
+                    );
+                  },
+                  child: Text('Register'),
+                ),
+              ],
             ),
           ],
         ),
