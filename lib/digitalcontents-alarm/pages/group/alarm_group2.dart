@@ -2,7 +2,7 @@ import 'package:alarm/digitalcontents-alarm/pages/group/alarm_group1.dart';
 import 'package:alarm/digitalcontents-alarm/pages/group/alarm_group3.dart';
 import 'package:flutter/material.dart';
 import '../setting/setting_page.dart';
-import 'package:alarm/digitalcontents-alarm/pages/group/wakeup2.dart';
+import 'package:alarm/digitalcontents-alarm/pages/group/wakeup2-1.dart';
 import '../mypage/my_page.dart';
 
 class AlarmGroup2 extends StatefulWidget {
@@ -111,6 +111,198 @@ class _AlarmGroup2State extends State<AlarmGroup2> {
           Stack(
             children: [
               Positioned(
+                top: MediaQuery.of(context).size.height * 1 / 10, // 縦の位置を指定
+                left: 0, // スタックの左端を指定
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // 中央揃え
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起きてる",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起こされてる",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起きてない", //
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          Stack(
+            children: [
+              Positioned(
+                top: MediaQuery.of(context).size.height * 2.5 / 10, // 縦の位置を指定
+                left: 0, // スタックの左端を指定
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // 中央揃え
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起きてる",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起こされてる",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起きてない", //
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          Stack(
+            children: [
+              Positioned(
+                top: MediaQuery.of(context).size.height * 4 / 10, // 縦の位置を指定
+                left: 0, // スタックの左端を指定
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // 中央揃え
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起きてる",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起こされてる",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起きてない", //
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          Stack(
+            children: [
+              Positioned(
+                top: MediaQuery.of(context).size.height * 5.5 / 10, // 縦の位置を指定
+                left: 0, // スタックの左端を指定
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // 中央揃え
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起きてる",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起こされてる",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                      ),
+                      child: Text(
+                        "起きてない", //
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          Stack(
+            children: [
+              Positioned(
                 left: MediaQuery.of(context).size.width * 8 / 10,
                 top: MediaQuery.of(context).size.height * 1 / 10,
                 child: Stack(
@@ -120,7 +312,7 @@ class _AlarmGroup2State extends State<AlarmGroup2> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Wakeup2(),
+                          builder: (context) => Wakeup2_1(),
                         ),
                       );
                     }),
@@ -141,7 +333,7 @@ class _AlarmGroup2State extends State<AlarmGroup2> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Wakeup2(), // Wakeup1ページに遷移
+                          builder: (context) => Wakeup2_1(), // Wakeup1ページに遷移
                         ),
                       );
                     }),
@@ -162,7 +354,7 @@ class _AlarmGroup2State extends State<AlarmGroup2> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Wakeup2(), // Wakeup1ページに遷移
+                          builder: (context) => Wakeup2_1(), // Wakeup1ページに遷移
                         ),
                       );
                     }),
@@ -183,7 +375,7 @@ class _AlarmGroup2State extends State<AlarmGroup2> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Wakeup2(), // Wakeup1ページに遷移
+                          builder: (context) => Wakeup2_1(), // Wakeup1ページに遷移
                         ),
                       );
                     }),
