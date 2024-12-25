@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: const AlarmSettingPage(
-        alarmLabel: '目覚まし1',
+        alarmLabel: 'alarm1', // 動的なラベルを指定
         initialTime: null,
       ),
     );
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
 }
 
 class AlarmSettingPage extends StatefulWidget {
-  final String alarmLabel;
+  final String alarmLabel; // 例: 'alarm1', 'alarm2'
   final TimeOfDay? initialTime;
 
   const AlarmSettingPage({
@@ -46,23 +47,21 @@ class _AlarmSettingPageState extends State<AlarmSettingPage> {
     selectedTime = widget.initialTime ?? TimeOfDay.now();
   }
 
-  // Firebaseに目覚ましデータを保存（常に上書き）
+  // Firebaseに目覚ましデータを保存
   Future<void> saveAlarmToFirebase(String alarmLabel, TimeOfDay time) async {
     try {
-      // ユーザID（ここでは仮に「userID」として扱っています。実際のユーザIDを使ってください）
-      String userId = "userID"; // ここを適切なユーザIDに変更してください
+      final User? user = FirebaseAuth.instance.currentUser; // 現在のログインユーザーを取得
+      if (user == null) {
+        throw Exception('ユーザーがログインしていません');
+      }
 
-      // ユーザのデータをusersコレクションに保存
+      final String userId = user.uid;
+
+      // 動的にデータを生成
       await FirebaseFirestore.instance.collection('users').doc(userId).set({
-        'email': 'user@example.com', // 仮のメールアドレス、実際のものを使用
-        'username': 'User Name', // ユーザー名
-        'alarm1Time': selectedTime?.format(context), // 目覚まし1の時刻
-        'alarm1Set': true, // 目覚まし1の設定有無
-        'alarm2Time': '09:00', // 目覚まし2の時刻（デフォルト）
-        'alarm2Set': false, // 目覚まし2の設定有無（デフォルト）
-        'alarm3Time': '10:00', // 目覚まし3の時刻（デフォルト）
-        'alarm3Set': false, // 目覚まし3の設定有無（デフォルト）
-      }, SetOptions(merge: true)); // 既存のデータに上書きしないようにmergeを使う
+        '${alarmLabel}Time': time.format(context), // 例: 'alarm1Time'
+        '${alarmLabel}Set': true, // 有効化
+      }, SetOptions(merge: true)); // 既存データを保持しつつ更新
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('目覚まし時刻を保存しました！')),
@@ -74,7 +73,6 @@ class _AlarmSettingPageState extends State<AlarmSettingPage> {
     }
   }
 
-  // 目覚まし時刻の保存ボタンが押された時の処理
   @override
   Widget build(BuildContext context) {
     return Scaffold(
