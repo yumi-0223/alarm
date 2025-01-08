@@ -1,16 +1,14 @@
+import 'package:alarm/digitalcontents-alarm/pages/mypage/alarm_Screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
 import '../group/alarm_group1.dart';
 import '../group/alarm_group2.dart';
 import '../group/alarm_group3.dart';
 import '../setting/setting_page.dart';
-import 'alarm_Screen.dart';
-import 'todo.dart';
-import 'dart:async';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:alarm/digitalcontents-alarm/pages/mypage/alarm_triggered_page.dart';
+import 'alarm_triggered_page.dart';
 
 class MyPage extends StatefulWidget {
   @override
@@ -18,128 +16,125 @@ class MyPage extends StatefulWidget {
 }
 
 class _MyPageState extends State<MyPage> {
-  List<Todo> todoList = [
-    Todo(title: "目覚まし1"),
-    Todo(title: "目覚まし2"),
-    Todo(title: "目覚まし3"),
-  ];
-
-  DateTime currentTime = DateTime.now();
-  String wakeStatus = "起きてる"; // 初期状態
-
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  final AudioPlayer audioPlayer = AudioPlayer();
-
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final AudioPlayer audioPlayer = AudioPlayer();
+  Map<String, dynamic> alarmData = {};
+  DateTime currentTime = DateTime.now();
+
+// アラームが鳴ったことを記録するリスト
+  List<String> triggeredAlarms = [];
 
   @override
   void initState() {
     super.initState();
-    _initializeNotifications();
+    _fetchAlarmData();
     Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
         currentTime = DateTime.now();
       });
       _checkAlarmTime();
     });
-    _fetchWakeStatus(); // 起床状態を初期取得
   }
 
-  void _initializeNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
-    await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: _onNotificationResponse,
-    );
-  }
+  Future<void> _fetchAlarmData() async {
+    try {
+      final user = auth.currentUser;
+      if (user == null) throw Exception('ログインユーザーが見つかりません');
 
-  void _onNotificationResponse(NotificationResponse notificationResponse) {
-    _showAlarmScreen();
-  }
+      final userDoc = await firestore.collection('users').doc(user.uid).get();
+      final userData = userDoc.data();
 
-  void _showAlarmScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => AlarmTriggeredPage(audioPlayer: audioPlayer)),
-    );
+      if (userData != null) {
+        setState(() {
+          alarmData = {
+            'alarm1Time': userData['目覚まし1Time'] ?? '未設定',
+            'alarm1Set': userData['目覚まし1Set'] ?? false,
+            'alarm2Time': userData['目覚まし2Time'] ?? '未設定',
+            'alarm2Set': userData['目覚まし2Set'] ?? false,
+            'alarm3Time': userData['目覚まし3Time'] ?? '未設定',
+            'alarm3Set': userData['目覚まし3Set'] ?? false,
+          };
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('アラームデータ取得エラー: $e')),
+      );
+    }
   }
 
   void _checkAlarmTime() {
-    for (var todo in todoList) {
-      if (todo.alarmTime != null && todo.isAlarmOn) {
-        final now = TimeOfDay.now();
-        if (now.hour == todo.alarmTime!.hour &&
-            now.minute == todo.alarmTime!.minute) {
-          _playAlarmSound();
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  AlarmTriggeredPage(audioPlayer: audioPlayer),
-            ),
-          );
-
-          todo.isAlarmOn = false;
+    final now = TimeOfDay.fromDateTime(currentTime);
+    for (int i = 1; i <= 3; i++) {
+      if (alarmData['alarm${i}Set'] == true &&
+          alarmData['alarm${i}Time'] != '未設定' &&
+          !triggeredAlarms.contains('alarm$i')) {
+        // 既に鳴ったアラームをスキップ
+        final alarmTime = _parseTime(alarmData['alarm${i}Time']);
+        if (alarmTime.hour == now.hour && alarmTime.minute == now.minute) {
+          _playAlarm();
+          _showAlarmScreen();
+          triggeredAlarms.add('alarm$i'); // リストに追加
+          Timer(Duration(minutes: 1), () {
+            triggeredAlarms.remove('alarm$i'); // 1分後にリストから削除
+          });
           break;
         }
       }
     }
   }
 
-  void _playAlarmSound() async {
-    await audioPlayer.play(
-      AssetSource('alarm.mp3'),
+  TimeOfDay _parseTime(String timeString) {
+    try {
+      final timeParts = timeString.split(":");
+      final hour = int.parse(timeParts[0]);
+      final minuteAndPeriod = timeParts[1].split(" ");
+      final minute = int.parse(minuteAndPeriod[0]);
+      final isPM = minuteAndPeriod[1] == "PM";
+      return TimeOfDay(
+        hour: isPM ? (hour % 12) + 12 : hour % 12,
+        minute: minute,
+      );
+    } catch (e) {
+      print('Error parsing time: $timeString');
+      return TimeOfDay.now();
+    }
+  }
+
+  void _playAlarm() async {
+    try {
+      await audioPlayer.play(AssetSource('alarm.mp3'));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('アラームが鳴っています！')),
+      );
+    } catch (e) {
+      print('Error playing alarm sound: $e');
+    }
+  }
+
+  void _showAlarmScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AlarmTriggeredPage(audioPlayer: audioPlayer),
+      ),
     );
   }
 
-  Future<void> _fetchWakeStatus() async {
-    try {
-      final user = auth.currentUser;
-      if (user == null) throw Exception('ログインしているユーザーが見つかりません');
-
-      final userDoc = await firestore.collection('users').doc(user.uid).get();
-      final userData = userDoc.data();
-
-      if (userData != null && userData['wakeStatus'] != null) {
-        setState(() {
-          wakeStatus = userData['wakeStatus'];
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('起床状態の取得エラー: $e')),
-      );
-    }
-  }
-
-  Future<void> _updateWakeStatus(String status) async {
-    try {
-      final user = auth.currentUser;
-      if (user == null) throw Exception('ログインしているユーザーが見つかりません');
-
-      await firestore.collection('users').doc(user.uid).set(
-        {'wakeStatus': status},
-        SetOptions(merge: true),
-      );
-
-      setState(() {
-        wakeStatus = status;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('起床状態を更新しました: $status')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('起床状態の更新エラー: $e')),
-      );
-    }
+  Widget _buildGroupButton(BuildContext context, String label, Widget page) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width / 4,
+      height: MediaQuery.of(context).size.height * 1 / 5,
+      child: FloatingActionButton(
+        onPressed: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => page),
+          );
+        },
+        child: Text(label),
+      ),
+    );
   }
 
   @override
@@ -150,124 +145,137 @@ class _MyPageState extends State<MyPage> {
           'マイページ | ${currentTime.hour}:${currentTime.minute}:${currentTime.second}',
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: todoList.length,
-              itemBuilder: (context, index) {
-                final todo = todoList[index];
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          todo.title,
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        const SizedBox(width: 20),
-                        if (todo.alarmTime != null)
-                          Text(
-                            "${todo.alarmTime!.hour.toString().padLeft(2, '0')}:${todo.alarmTime!.minute.toString().padLeft(2, '0')}",
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        const SizedBox(width: 10),
-                        if (todo.alarmTime != null)
-                          Switch(
-                            value: todo.isAlarmOn,
-                            onChanged: (value) {
-                              setState(() {
-                                todo.isAlarmOn = value;
-                              });
-                            },
-                          ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () async {
-                            final updatedTime =
-                                await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => AlarmSettingPage(
-                                  alarmLabel: todo.title,
-                                  initialTime: todo.alarmTime,
+      body: alarmData.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
+              children: [
+                Column(
+                  children: [
+                    Expanded(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: List.generate(3, (index) {
+                          int i = index + 1;
+                          return Card(
+                            margin: const EdgeInsets.all(8.0),
+                            child: ListTile(
+                              title: Text('目覚まし$i'),
+                              subtitle: Text(
+                                '時刻: ${alarmData['alarm${i}Time']}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Switch(
+                                    value: alarmData['alarm${i}Set'] ?? false,
+                                    onChanged: (isOn) async {
+                                      setState(() {
+                                        alarmData['alarm${i}Set'] = isOn;
+                                      });
+                                      await firestore
+                                          .collection('users')
+                                          .doc(auth.currentUser!.uid)
+                                          .update({'目覚まし${i}Set': isOn});
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.settings),
+                                    onPressed: () async {
+                                      final newTime =
+                                          await Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              AlarmSettingPage(
+                                            alarmLabel: '目覚まし$i',
+                                            initialTime: alarmData[
+                                                        'alarm${i}Time'] !=
+                                                    '未設定'
+                                                ? _parseTime(
+                                                    alarmData['alarm${i}Time'])
+                                                : null,
+                                          ),
+                                        ),
+                                      );
+                                      if (newTime != null) {
+                                        setState(() {
+                                          alarmData['alarm${i}Time'] =
+                                              newTime.format(context);
+                                        });
+                                        await firestore
+                                            .collection('users')
+                                            .doc(auth.currentUser!.uid)
+                                            .update({
+                                          '目覚まし${i}Time':
+                                              newTime.format(context)
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                    // カメラボタンやメッセージ表示部分を追加
+                    Padding(
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).size.height * 0.3),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  border:
+                                      Border.all(color: Colors.black, width: 1),
+                                  color:
+                                      const Color.fromARGB(255, 211, 211, 211),
+                                ),
+                                child: Text(
+                                  "起きてる",
+                                  style: TextStyle(fontSize: 20),
                                 ),
                               ),
-                            );
-
-                            if (updatedTime != null) {
-                              setState(() {
-                                todo.alarmTime = updatedTime;
-                                todo.isAlarmOn = true;
-                              });
-                            }
-                          },
-                          child: const Text('セット'),
-                        ),
-                      ],
+                              SizedBox(width: 20),
+                              Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  border:
+                                      Border.all(color: Colors.black, width: 1),
+                                  color:
+                                      const Color.fromARGB(255, 211, 211, 211),
+                                ),
+                                child: Text(
+                                  "起きてない",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // 起床状態選択ボタン
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        wakeStatus == "起きてる" ? Colors.green : Colors.grey,
-                  ),
-                  onPressed: () => _updateWakeStatus("起きてる"),
-                  child: Text("起きてる"),
+                  ],
                 ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        wakeStatus == "起きてない" ? Colors.red : Colors.grey,
+                Positioned(
+                  left: 0,
+                  top: MediaQuery.of(context).size.height * 7 / 10,
+                  child: Row(
+                    children: [
+                      _buildGroupButton(context, "設定", SettingPage()),
+                      _buildGroupButton(context, "グループ1", AlarmGroup1()),
+                      _buildGroupButton(context, "グループ2", AlarmGroup2()),
+                      _buildGroupButton(context, "グループ3", AlarmGroup3()),
+                    ],
                   ),
-                  onPressed: () => _updateWakeStatus("起きてない"),
-                  child: Text("起きてない"),
                 ),
               ],
             ),
-          ),
-
-          // グループ選択ボタン
-          Row(
-            children: [
-              _buildGroupButton(context, "設定", SettingPage()),
-              _buildGroupButton(context, "グループ1", AlarmGroup1()),
-              _buildGroupButton(context, "グループ2", AlarmGroup2()),
-              _buildGroupButton(context, "グループ3", AlarmGroup3()),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGroupButton(BuildContext context, String label, Widget page) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width / 4,
-      height: MediaQuery.of(context).size.height * 1 / 5,
-      child: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => page),
-          );
-        },
-        child: Text(label),
-      ),
     );
   }
 }
