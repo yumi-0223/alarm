@@ -20,15 +20,18 @@ class _MyPageState extends State<MyPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final AudioPlayer audioPlayer = AudioPlayer();
   Map<String, dynamic> alarmData = {};
+  String wakeStatus = "起きてない"; // 初期値は「起きてない」
   DateTime currentTime = DateTime.now();
 
 // アラームが鳴ったことを記録するリスト
   List<String> triggeredAlarms = [];
+  StreamSubscription<DocumentSnapshot>? _alarmSubscription;
 
   @override
   void initState() {
     super.initState();
-    _fetchAlarmData();
+    _listenToAlarmUpdates();
+    _fetchWakeStatus();
     Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
         currentTime = DateTime.now();
@@ -37,14 +40,28 @@ class _MyPageState extends State<MyPage> {
     });
   }
 
-  Future<void> _fetchAlarmData() async {
-    try {
-      final user = auth.currentUser;
-      if (user == null) throw Exception('ログインユーザーが見つかりません');
+  @override
+  void dispose() {
+    _alarmSubscription?.cancel();
+    super.dispose();
+  }
 
-      final userDoc = await firestore.collection('users').doc(user.uid).get();
-      final userData = userDoc.data();
+  // Firebaseのリアルタイムリスナーで目覚ましデータを監視
+  void _listenToAlarmUpdates() {
+    final user = auth.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('ログインユーザーが見つかりません')),
+      );
+      return;
+    }
 
+    _alarmSubscription = firestore
+        .collection('users')
+        .doc(user.uid)
+        .snapshots()
+        .listen((snapshot) {
+      final userData = snapshot.data();
       if (userData != null) {
         setState(() {
           alarmData = {
@@ -57,27 +74,66 @@ class _MyPageState extends State<MyPage> {
           };
         });
       }
+    });
+  }
+
+  Future<void> _fetchWakeStatus() async {
+    try {
+      final user = auth.currentUser;
+      if (user == null) throw Exception('ログインユーザーが見つかりません');
+
+      final userDoc = await firestore.collection('users').doc(user.uid).get();
+      final userData = userDoc.data();
+
+      if (userData != null && userData['wakeStatus'] != null) {
+        setState(() {
+          wakeStatus = userData['wakeStatus'];
+        });
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('アラームデータ取得エラー: $e')),
+        SnackBar(content: Text('起床状態取得エラー: $e')),
+      );
+    }
+  }
+
+  Future<void> _updateWakeStatus(String status) async {
+    try {
+      final user = auth.currentUser;
+      if (user == null) throw Exception('ログインユーザーが見つかりません');
+
+      await firestore.collection('users').doc(user.uid).update({
+        'wakeStatus': status,
+      });
+
+      setState(() {
+        wakeStatus = status;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('起床状態を「$status」に更新しました')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('起床状態更新エラー: $e')),
       );
     }
   }
 
   void _checkAlarmTime() {
     final now = TimeOfDay.fromDateTime(currentTime);
+
     for (int i = 1; i <= 3; i++) {
       if (alarmData['alarm${i}Set'] == true &&
           alarmData['alarm${i}Time'] != '未設定' &&
           !triggeredAlarms.contains('alarm$i')) {
-        // 既に鳴ったアラームをスキップ
         final alarmTime = _parseTime(alarmData['alarm${i}Time']);
         if (alarmTime.hour == now.hour && alarmTime.minute == now.minute) {
           _playAlarm();
           _showAlarmScreen();
-          triggeredAlarms.add('alarm$i'); // リストに追加
+          triggeredAlarms.add('alarm$i');
           Timer(Duration(minutes: 1), () {
-            triggeredAlarms.remove('alarm$i'); // 1分後にリストから削除
+            triggeredAlarms.remove('alarm$i'); // 1分後にリセット
           });
           break;
         }
@@ -85,6 +141,7 @@ class _MyPageState extends State<MyPage> {
     }
   }
 
+  // 時刻文字列をTimeOfDayに変換
   TimeOfDay _parseTime(String timeString) {
     try {
       final timeParts = timeString.split(":");
@@ -102,17 +159,19 @@ class _MyPageState extends State<MyPage> {
     }
   }
 
+  // アラーム音を再生
   void _playAlarm() async {
     try {
       await audioPlayer.play(AssetSource('alarm.mp3'));
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('アラームが鳴っています！')),
+        SnackBar(content: Text('アラームが鳴っています！')),
       );
     } catch (e) {
       print('Error playing alarm sound: $e');
     }
   }
 
+  // アラーム画面を表示
   void _showAlarmScreen() {
     Navigator.push(
       context,
@@ -219,7 +278,6 @@ class _MyPageState extends State<MyPage> {
                         }),
                       ),
                     ),
-                    // カメラボタンやメッセージ表示部分を追加
                     Padding(
                       padding: EdgeInsets.only(
                           bottom: MediaQuery.of(context).size.height * 0.3),
@@ -228,32 +286,23 @@ class _MyPageState extends State<MyPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  border:
-                                      Border.all(color: Colors.black, width: 1),
-                                  color:
-                                      const Color.fromARGB(255, 211, 211, 211),
+                              ElevatedButton(
+                                onPressed: () => _updateWakeStatus("起きてる"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: wakeStatus == "起きてる"
+                                      ? Colors.green
+                                      : Colors.grey,
                                 ),
-                                child: Text(
-                                  "起きてる",
-                                  style: TextStyle(fontSize: 20),
-                                ),
+                                child: Text("起きてる"),
                               ),
-                              SizedBox(width: 20),
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  border:
-                                      Border.all(color: Colors.black, width: 1),
-                                  color:
-                                      const Color.fromARGB(255, 211, 211, 211),
+                              ElevatedButton(
+                                onPressed: () => _updateWakeStatus("起きてない"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: wakeStatus == "起きてない"
+                                      ? Colors.red
+                                      : Colors.grey,
                                 ),
-                                child: Text(
-                                  "起きてない",
-                                  style: TextStyle(fontSize: 20),
-                                ),
+                                child: Text("起きてない"),
                               ),
                             ],
                           ),

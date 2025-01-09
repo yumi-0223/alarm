@@ -1,9 +1,8 @@
-import 'package:alarm/digitalcontents-alarm/pages/group/alarm_group1.dart';
-import 'package:alarm/digitalcontents-alarm/pages/group/alarm_group3.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../setting/setting_page.dart';
-import 'package:alarm/digitalcontents-alarm/pages/group/wakeup2-1.dart';
-import '../mypage/my_page.dart';
+import 'package:alarm/digitalcontents-alarm/pages/group/wakeup1-1.dart';
 
 class AlarmGroup2 extends StatefulWidget {
   @override
@@ -11,403 +10,232 @@ class AlarmGroup2 extends StatefulWidget {
 }
 
 class _AlarmGroup2State extends State<AlarmGroup2> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  String? groupId;
+  Map<String, dynamic> groupData = {};
+  Map<String, String> userNames = {};
+  Map<String, String> memberAlarmTimes = {};
+  Map<String, String> wakeStatuses = {}; // メンバーの起床状態
+  String? alarmTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchGroupData();
+    _fetchAlarmTime();
+  }
+
+  Future<void> _fetchGroupData() async {
+    try {
+      final user = auth.currentUser;
+      if (user == null) throw Exception('ログインユーザーが見つかりません');
+
+      final userDoc = await firestore.collection('users').doc(user.uid).get();
+      final userData = userDoc.data();
+      if (userData == null || userData['groups'] == null) {
+        throw Exception('ユーザーのグループ情報が見つかりません');
+      }
+
+      final List<dynamic> userGroups = userData['groups'];
+      final String selectedGroupId = userGroups[1];
+
+      final groupDoc =
+          await firestore.collection('groups').doc(selectedGroupId).get();
+      if (!groupDoc.exists) throw Exception('グループ情報が見つかりません');
+
+      setState(() {
+        groupId = selectedGroupId;
+        groupData = groupDoc.data() as Map<String, dynamic>;
+      });
+
+      await _fetchUserNamesAndAlarmTimes(groupData['members'] as List<dynamic>);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('エラー: $e')),
+      );
+    }
+  }
+
+  Future<void> _fetchUserNamesAndAlarmTimes(List<dynamic> memberIds) async {
+    try {
+      for (String userId in memberIds) {
+        if (!userNames.containsKey(userId)) {
+          final userDoc = await firestore.collection('users').doc(userId).get();
+          if (userDoc.exists) {
+            final userData = userDoc.data();
+            if (userData != null) {
+              setState(() {
+                userNames[userId] = userData['name'] ?? '名前未設定';
+                memberAlarmTimes[userId] =
+                    userData['目覚まし1Time'] ?? '未設定'; // 目覚まし時刻
+                wakeStatuses[userId] = userData['wakeStatus'] ?? '不明'; // 起床状態
+              });
+            }
+          }
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('データ取得エラー: $e')),
+      );
+    }
+  }
+
+  Future<void> _fetchAlarmTime() async {
+    try {
+      final user = auth.currentUser;
+      if (user == null) throw Exception('ログインユーザーが見つかりません');
+
+      final userDoc = await firestore.collection('users').doc(user.uid).get();
+      final userData = userDoc.data();
+      if (userData == null) throw Exception('ユーザー情報が見つかりません');
+
+      setState(() {
+        alarmTime = userData['目覚まし1Time'];
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('目覚まし時間取得エラー: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 画面サイズを取得
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
+    if (groupId == null || groupData.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('グループ1'),
+        ),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    final members = groupData['members'] as List<dynamic>;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('グループ２'),
+        title: Text('グループ1'),
       ),
-      body: Stack(
-        children: [
-          // グループ選択ボタン
-          Positioned(
-            left: screenWidth * 0, // 位置
-            top: screenHeight * 7 / 10, // 位置
-            child: SizedBox(
-              width: screenWidth / 4, // 幅を設定
-              height: screenHeight * 1 / 5, // 高さを設定
-              child: FloatingActionButton(
-                onPressed: () async {
-                  final newListText = await Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) {
-                      return SettingPage();
-                    }),
-                  );
-                },
-                child: const Text("設定"),
-              ),
-            ),
-          ),
-          Positioned(
-            left: screenWidth * 1 / 4, // 位置
-            top: screenHeight * 7 / 10, // 位置
-            child: SizedBox(
-              width: screenWidth / 4, // 幅を設定
-              height: screenHeight * 1 / 5, // 高さを設定
-              child: FloatingActionButton(
-                onPressed: () async {
-                  final newListText = await Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) {
-                      return AlarmGroup1();
-                    }),
-                  );
-                },
-                child: const Text("グループ1"),
-              ),
-            ),
-          ),
-          Positioned(
-            left: screenWidth * 2 / 4, // 位置
-            top: screenHeight * 7 / 10, // 位置
-            child: SizedBox(
-              width: screenWidth / 4, // 幅を設定
-              height: screenHeight * 1 / 5, // 高さを設定
-              child: FloatingActionButton(
-                onPressed: () async {
-                  final newListText = await Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) {
-                      return AlarmGroup2();
-                    }),
-                  );
-                },
-                child: const Text("グループ2"),
-              ),
-            ),
-          ),
-          Positioned(
-            left: screenWidth * 3 / 4, // 位置
-            top: screenHeight * 7 / 10, // 位置
-            child: SizedBox(
-              width: screenWidth / 4, // 幅を設定
-              height: screenHeight * 1 / 5, // 高さを設定
-              child: FloatingActionButton(
-                onPressed: () async {
-                  final newListText = await Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) {
-                      return AlarmGroup3();
-                    }),
-                  );
-                },
-                child: const Text("グループ3"),
-              ),
-            ),
-          ),
-          Stack(
-            children: List.generate(4, (index) {
-              return Positioned(
-                left: screenWidth / 10,
-                top: screenHeight * (1 + 1.5 * index) / 10, // 間隔を調整
-                child: Text(
-                  '名前${index + 1}', // 名前1, 名前2, ...
-                ),
-              );
-            }),
-          ),
-
-          Stack(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
             children: [
-              Positioned(
-                top: MediaQuery.of(context).size.height * 1 / 10, // 縦の位置を指定
-                left: 0, // スタックの左端を指定
-                right: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // 中央揃え
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起きてる",
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起こされてる",
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起きてない", //
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                  ],
-                ),
+              Text(
+                alarmTime != null ? '自分の目覚まし1: $alarmTime' : '目覚まし時間を取得中...',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
+              SizedBox(height: 20),
+              ...List.generate(members.length, (index) {
+                final memberId = members[index];
+                final memberName = userNames[memberId] ?? '名前を取得中...';
+                final memberAlarmTime = memberAlarmTimes[memberId] ?? '未設定';
+                final wakeStatus = wakeStatuses[memberId] ?? '不明';
 
-          Stack(
-            children: [
-              Positioned(
-                top: MediaQuery.of(context).size.height * 2.5 / 10, // 縦の位置を指定
-                left: 0, // スタックの左端を指定
-                right: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // 中央揃え
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起きてる",
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起こされてる",
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起きてない", //
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+                bool showWakeButton = false;
 
-          Stack(
-            children: [
-              Positioned(
-                top: MediaQuery.of(context).size.height * 4 / 10, // 縦の位置を指定
-                left: 0, // スタックの左端を指定
-                right: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // 中央揃え
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起きてる",
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起こされてる",
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起きてない", //
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+                if (memberAlarmTime != '未設定') {
+                  final alarmDateTime = _parseAlarmTime(memberAlarmTime);
+                  if (alarmDateTime != null &&
+                      alarmDateTime.isBefore(DateTime.now()) &&
+                      wakeStatus == '起きてない') {
+                    showWakeButton = true;
+                  }
+                }
 
-          Stack(
-            children: [
-              Positioned(
-                top: MediaQuery.of(context).size.height * 5.5 / 10, // 縦の位置を指定
-                left: 0, // スタックの左端を指定
-                right: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // 中央揃え
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起きてる",
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起こされてる",
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: const Color.fromARGB(255, 211, 211, 211),
-                      ),
-                      child: Text(
-                        "起きてない", //
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          Stack(
-            children: [
-              Positioned(
-                left: MediaQuery.of(context).size.width * 8 / 10,
-                top: MediaQuery.of(context).size.height * 1 / 10,
-                child: Stack(
-                  alignment: Alignment.center, // 中央にアイコンを配置
-                  children: [
-                    FloatingActionButton(onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Wakeup2_1(),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          memberName,
+                          style: TextStyle(fontSize: 16),
                         ),
-                      );
-                    }),
-                    Icon(
-                      Icons.alarm, // ボタンの上に表示するアイコン
-                      size: 24, // アイコンのサイズ
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: MediaQuery.of(context).size.width * 8 / 10,
-                top: MediaQuery.of(context).size.height * 2.5 / 10,
-                child: Stack(
-                  alignment: Alignment.center, // 中央にアイコンを配置
-                  children: [
-                    FloatingActionButton(onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Wakeup2_1(), // Wakeup1ページに遷移
-                        ),
-                      );
-                    }),
-                    Icon(
-                      Icons.alarm, // ボタンの上に表示するアイコン
-                      size: 24, // アイコンのサイズ
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: MediaQuery.of(context).size.width * 8 / 10,
-                top: MediaQuery.of(context).size.height * 4 / 10,
-                child: Stack(
-                  alignment: Alignment.center, // 中央にアイコンを配置
-                  children: [
-                    FloatingActionButton(onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Wakeup2_1(), // Wakeup1ページに遷移
-                        ),
-                      );
-                    }),
-                    Icon(
-                      Icons.alarm, // ボタンの上に表示するアイコン
-                      size: 24, // アイコンのサイズ
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: MediaQuery.of(context).size.width * 8 / 10,
-                top: MediaQuery.of(context).size.height * 5.5 / 10,
-                child: Stack(
-                  alignment: Alignment.center, // 中央にアイコンを配置
-                  children: [
-                    FloatingActionButton(onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Wakeup2_1(), // Wakeup1ページに遷移
-                        ),
-                      );
-                    }),
-                    Icon(
-                      Icons.alarm, // ボタンの上に表示するアイコン
-                      size: 24, // アイコンのサイズ
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: screenWidth * 9 / 10,
-                top: screenHeight * 0 / 10,
-                child: FloatingActionButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MyPage(),
                       ),
-                    );
-                  },
-                  child: Icon(
-                    Icons.home,
-                    size: 24,
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          '目覚まし: $memberAlarmTime',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      if (showWakeButton)
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Wakeup1_1(
+                                  userId: memberId, // ユーザーIDを渡す
+                                  alarmTime: memberAlarmTime, // 現在の目覚まし時刻を渡す
+                                ),
+                              ),
+                            );
+                          },
+                          child: Text('起こす'),
+                        ),
+                    ],
                   ),
-                ),
+                );
+              }),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SettingPage()),
+                  );
+                },
+                child: Text('設定'),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  DateTime? _parseAlarmTime(String alarmTime) {
+    try {
+      final now = DateTime.now();
+      final timeParts = alarmTime.split(':');
+      final hour = int.parse(timeParts[0]);
+      final minute = int.parse(timeParts[1].split(' ')[0]);
+      final isPM = alarmTime.toLowerCase().contains('pm');
+      return DateTime(
+        now.year,
+        now.month,
+        now.day,
+        isPM ? hour + 12 : hour,
+        minute,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> _sendWakeNotification(String memberId) async {
+    try {
+      await firestore.collection('users').doc(memberId).update({
+        'wakeStatus': '起きてる',
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('起こす通知を送信しました')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('通知送信エラー: $e')),
+      );
+    }
   }
 }

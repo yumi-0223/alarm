@@ -28,6 +28,9 @@ class Wakeup1_2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -41,18 +44,26 @@ class Wakeup1_2 extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                onPressed: () async {
-                  await _updateAlarmTime(); // 目覚まし時刻を更新
-                  Navigator.pop(context);
-                },
-                child: Text('はい'),
+              SizedBox(
+                width: screenWidth / 4,
+                height: screenHeight / 8,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await _updateAlarmTime(); // 目覚まし時刻を更新
+                    Navigator.pop(context);
+                  },
+                  child: Text('はい', style: TextStyle(fontSize: 18)),
+                ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('いいえ'),
+              SizedBox(
+                width: screenWidth / 4,
+                height: screenHeight / 8,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('いいえ', style: TextStyle(fontSize: 18)),
+                ),
               ),
             ],
           ),
