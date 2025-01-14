@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../group/alarm_group1.dart'; // 対象ページのインポートを追加
 
 class Wakeup1_2 extends StatelessWidget {
   final String userId;
@@ -50,7 +51,12 @@ class Wakeup1_2 extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     await _updateAlarmTime(); // 目覚まし時刻を更新
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AlarmGroup1(), // ページに遷移
+                      ),
+                    );
                   },
                   child: Text('はい', style: TextStyle(fontSize: 18)),
                 ),

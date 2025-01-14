@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../setting/setting_page.dart';
+import '../mypage/my_page.dart'; // MyPageのインポートを追加
 import 'package:alarm/digitalcontents-alarm/pages/group/wakeup1-1.dart';
 
 class AlarmGroup3 extends StatefulWidget {
@@ -39,7 +40,7 @@ class _AlarmGroup3State extends State<AlarmGroup3> {
       }
 
       final List<dynamic> userGroups = userData['groups'];
-      final String selectedGroupId = userGroups[2];
+      final String selectedGroupId = userGroups[0];
 
       final groupDoc =
           await firestore.collection('groups').doc(selectedGroupId).get();
@@ -110,7 +111,7 @@ class _AlarmGroup3State extends State<AlarmGroup3> {
     if (groupId == null || groupData.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('グループ1'),
+          title: Text('グループ3'),
         ),
         body: Center(
           child: CircularProgressIndicator(),
@@ -122,7 +123,7 @@ class _AlarmGroup3State extends State<AlarmGroup3> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('グループ1'),
+        title: Text('グループ3'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -130,7 +131,7 @@ class _AlarmGroup3State extends State<AlarmGroup3> {
           child: Column(
             children: [
               Text(
-                alarmTime != null ? '自分の目覚まし1: $alarmTime' : '目覚まし時間を取得中...',
+                alarmTime != null ? '起床予定時刻: $alarmTime' : '目覚まし時間を取得中...',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
@@ -202,6 +203,24 @@ class _AlarmGroup3State extends State<AlarmGroup3> {
           ),
         ),
       ),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: 20), // ボタン位置調整
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyPage()),
+            );
+          },
+          label: Text(
+            'マイページ',
+            style: TextStyle(fontSize: 16),
+          ),
+          icon: Icon(Icons.home),
+        ),
+      ),
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.centerFloat, // ボタンを中央下に配置
     );
   }
 
