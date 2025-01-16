@@ -40,7 +40,7 @@ class _AlarmGroup3State extends State<AlarmGroup3> {
       }
 
       final List<dynamic> userGroups = userData['groups'];
-      final String selectedGroupId = userGroups[0];
+      final String selectedGroupId = userGroups[2];
 
       final groupDoc =
           await firestore.collection('groups').doc(selectedGroupId).get();
@@ -189,16 +189,6 @@ class _AlarmGroup3State extends State<AlarmGroup3> {
                   ),
                 );
               }),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SettingPage()),
-                  );
-                },
-                child: Text('設定'),
-              ),
             ],
           ),
         ),

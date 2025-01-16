@@ -189,16 +189,6 @@ class _AlarmGroup1State extends State<AlarmGroup1> {
                   ),
                 );
               }),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SettingPage()),
-                  );
-                },
-                child: Text('設定'),
-              ),
             ],
           ),
         ),
