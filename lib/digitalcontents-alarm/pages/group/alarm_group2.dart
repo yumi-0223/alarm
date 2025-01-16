@@ -158,9 +158,24 @@ class _AlarmGroup2State extends State<AlarmGroup2> {
                     children: [
                       Expanded(
                         flex: 2,
-                        child: Text(
-                          memberName,
-                          style: TextStyle(fontSize: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              memberName,
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              '状態: $wakeStatus', // 起床状態を表示
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: wakeStatus == '起きてる'
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Expanded(
